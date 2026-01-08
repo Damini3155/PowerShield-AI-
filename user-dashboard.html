@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - EnergyGuard AI</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="animated-background"></div>
+    <div class="particles"></div>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">EnergyGuard AI</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="user-dashboard.html" class="nav-link active">User Dashboard</a>
+                <a href="admin-dashboard.html" class="nav-link">Admin Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard-main">
+        <!-- Alert Banner -->
+        <div id="alertBanner" class="alert-banner hidden">
+            <div class="alert-content">
+                <span class="alert-icon">⚠️</span>
+                <div class="alert-text">
+                    <strong>Anomaly Detected!</strong>
+                    <span id="alertMessage">Suspicious consumption pattern detected. Please review your usage.</span>
+                </div>
+                <button class="alert-close" onclick="closeAlert()">×</button>
+            </div>
+        </div>
+
+        <div class="dashboard-container">
+            <header class="dashboard-header">
+                <h1>User Dashboard</h1>
+                <p class="dashboard-subtitle">Monitor your electricity consumption and detect anomalies</p>
+            </header>
+
+            <!-- Upload Section -->
+            <section class="upload-section glass-card">
+                <h2 class="section-heading">Upload Consumption Data</h2>
+                <div class="upload-area" id="uploadArea">
+                    <input type="file" id="csvFileInput" accept=".csv" class="hidden">
+                    <div class="upload-content">
+                        <div class="upload-icon">📁</div>
+                        <p>Drag & drop CSV file here or <span class="upload-link" onclick="document.getElementById('csvFileInput').click()">browse</span></p>
+                        <p class="upload-hint">Format: timestamp, meter_id, user_consumption, neighbourhood_average</p>
+                    </div>
+                </div>
+                <div id="uploadStatus" class="upload-status hidden"></div>
+            </section>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card glass-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Current Consumption</div>
+                        <div class="stat-value" id="currentConsumption">0.00</div>
+                        <div class="stat-unit">kWh</div>
+                    </div>
+                </div>
+                <div class="stat-card glass-card">
+                    <div class="stat-icon">📈</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Neighbourhood Avg</div>
+                        <div class="stat-value" id="neighbourhoodAvg">0.00</div>
+                        <div class="stat-unit">kWh</div>
+                    </div>
+                </div>
+                <div class="stat-card glass-card">
+                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Risk Status</div>
+                        <div class="stat-value risk-status" id="riskStatus">Normal</div>
+                        <div class="stat-unit" id="riskLevel">Low Risk</div>
+                    </div>
+                </div>
+                <div class="stat-card glass-card">
+                    <div class="stat-icon">🔍</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Anomalies Detected</div>
+                        <div class="stat-value" id="anomalyCount">0</div>
+                        <div class="stat-unit">Today</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <section class="charts-section">
+                <div class="chart-container glass-card">
+                    <h2 class="section-heading">Consumption Trend</h2>
+                    <canvas id="consumptionChart"></canvas>
+                </div>
+                <div class="chart-container glass-card">
+                    <h2 class="section-heading">Comparison Analysis</h2>
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Explainable AI Section -->
+            <section class="explainable-ai-section glass-card">
+                <h2 class="section-heading">🔍 Explainable AI - Why This Alert?</h2>
+                <div id="explainableContent" class="explainable-content">
+                    <div class="explanation-placeholder">
+                        <p>Upload data to see AI explanations for detected anomalies.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Optimization Tips Section -->
+            <section class="optimization-section glass-card">
+                <h2 class="section-heading">💡 AI Energy Optimization Tips</h2>
+                <div id="optimizationTips" class="tips-container">
+                    <div class="tip-item">
+                        <div class="tip-icon">💡</div>
+                        <div class="tip-content">
+                            <h3>Upload Data to Get Personalized Tips</h3>
+                            <p>Our AI will analyze your consumption patterns and provide customized recommendations.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 EnergyGuard AI. Advanced Electricity Theft Detection System.</p>
+    </footer>
+
+    <script src="anomaly-detection.js"></script>
+    <script src="chart-utils.js"></script>
+    <script src="user-dashboard.js"></script>
+</body>
+</html>
+

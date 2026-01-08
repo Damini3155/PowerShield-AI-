@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - EnergyGuard AI</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="animated-background"></div>
+    <div class="particles"></div>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">EnergyGuard AI</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="user-dashboard.html" class="nav-link">User Dashboard</a>
+                <a href="admin-dashboard.html" class="nav-link active">Admin Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard-main">
+        <div class="dashboard-container">
+            <header class="dashboard-header">
+                <h1>Admin Dashboard</h1>
+                <p class="dashboard-subtitle">Monitor all users and detect electricity theft across the network</p>
+            </header>
+
+            <!-- Admin Stats -->
+            <div class="admin-stats-grid">
+                <div class="admin-stat-card glass-card">
+                    <div class="admin-stat-icon">👥</div>
+                    <div class="admin-stat-content">
+                        <div class="admin-stat-label">Total Users</div>
+                        <div class="admin-stat-value" id="totalUsers">0</div>
+                    </div>
+                </div>
+                <div class="admin-stat-card glass-card">
+                    <div class="admin-stat-icon">✅</div>
+                    <div class="admin-stat-content">
+                        <div class="admin-stat-label">Normal Status</div>
+                        <div class="admin-stat-value" id="normalUsers">0</div>
+                    </div>
+                </div>
+                <div class="admin-stat-card glass-card">
+                    <div class="admin-stat-icon">⚠️</div>
+                    <div class="admin-stat-content">
+                        <div class="admin-stat-label">Suspicious</div>
+                        <div class="admin-stat-value" id="suspiciousUsers">0</div>
+                    </div>
+                </div>
+                <div class="admin-stat-card glass-card">
+                    <div class="admin-stat-icon">🔴</div>
+                    <div class="admin-stat-content">
+                        <div class="admin-stat-label">High Risk</div>
+                        <div class="admin-stat-value" id="highRiskUsers">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Table -->
+            <section class="users-section glass-card">
+                <h2 class="section-heading">User Monitoring</h2>
+                <div class="table-container">
+                    <table class="users-table">
+                        <thead>
+                            <tr>
+                                <th>Meter ID</th>
+                                <th>Current Consumption</th>
+                                <th>Neighbourhood Avg</th>
+                                <th>Deviation</th>
+                                <th>Risk Status</th>
+                                <th>Anomalies</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <tr class="table-placeholder">
+                                <td colspan="7">No user data available. Data will appear after uploads from user dashboard.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Admin Charts -->
+            <section class="admin-charts-section">
+                <div class="chart-container glass-card">
+                    <h2 class="section-heading">Risk Distribution</h2>
+                    <canvas id="riskDistributionChart"></canvas>
+                </div>
+                <div class="chart-container glass-card">
+                    <h2 class="section-heading">Network Overview</h2>
+                    <canvas id="networkChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Admin Notifications -->
+            <section class="admin-notifications-section glass-card">
+                <h2 class="section-heading">🔔 System Notifications</h2>
+                <div id="adminNotifications" class="notifications-container">
+                    <div class="notification-placeholder">
+                        <p>System notifications will appear here when anomalies are detected.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 EnergyGuard AI. Advanced Electricity Theft Detection System.</p>
+    </footer>
+
+    <script src="anomaly-detection.js"></script>
+    <script src="chart-utils.js"></script>
+    <script src="admin-dashboard.js"></script>
+</body>
+</html>
+
