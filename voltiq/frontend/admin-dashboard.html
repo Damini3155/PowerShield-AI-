@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voltiq — Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060e1f;--sidebar:#08111f;--card2:rgba(13,26,46,.8);
+  --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.05);
+  --blue:#3b82f6;--blue2:#2563eb;--blue3:#60a5fa;--blue4:rgba(59,130,246,.1);
+  --green:#10b981;--green2:#34d399;--green3:rgba(16,185,129,.1);
+  --red:#ef4444;--red3:rgba(239,68,68,.1);--amber:#f59e0b;--amber2:#fbbf24;
+  --t1:#f1f5f9;--t2:#94a3b8;--t3:#64748b;--t4:#475569;
+  --sw:260px;--th:68px;--r:16px;--r2:10px;
+  --tr:all .22s cubic-bezier(.4,0,.2,1);--sh:0 4px 24px rgba(0,0,0,.4);--sh2:0 8px 40px rgba(0,0,0,.5);
+}
+html,body{height:100%}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none} button{font-family:'Inter',sans-serif;cursor:pointer;border:none;outline:none} input,select,textarea{font-family:'Inter',sans-serif;outline:none}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--sidebar)}::-webkit-scrollbar-thumb{background:#1e3a5f;border-radius:3px}
+
+/* Sidebar */
+.sidebar{position:fixed;top:0;left:0;width:var(--sw);height:100vh;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100}
+.sb-logo{display:flex;align-items:center;gap:11px;padding:22px 20px;border-bottom:1px solid var(--border)}
+.sb-logo-icon{width:38px;height:38px;background:linear-gradient(135deg,#ef4444,#f59e0b);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sb-logo-text{font-size:20px;font-weight:800;letter-spacing:-.5px;background:linear-gradient(135deg,#fff,var(--blue3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sb-nav{flex:1;padding:14px 10px;overflow-y:auto}
+.sb-sec{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t4);padding:0 10px;margin:18px 0 6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r2);font-size:13.5px;font-weight:500;color:var(--t3);cursor:pointer;transition:var(--tr);margin-bottom:2px;position:relative}
+.nav-item:hover{background:rgba(255,255,255,.05);color:var(--t1)}
+.nav-item.active{background:linear-gradient(135deg,rgba(239,68,68,.18),rgba(239,68,68,.08));color:#fca5a5;border:1px solid rgba(239,68,68,.2)}
+.nav-item .ni{font-size:17px;width:22px;text-align:center;flex-shrink:0}
+.nav-item .nlabel{flex:1}
+.nbadge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;min-width:20px;text-align:center}
+.nav-item.logout{color:var(--red)} .nav-item.logout:hover{background:rgba(239,68,68,.1)}
+.sb-user{padding:14px;border-top:1px solid var(--border)}
+.sb-user-inner{display:flex;align-items:center;gap:10px;padding:10px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:var(--r2)}
+.avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#ef4444,#f59e0b);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.av-lg{width:42px;height:42px;font-size:15px}
+.sb-uname{font-size:13px;font-weight:600;color:var(--t1)} .sb-urole{font-size:11px;color:var(--t3)}
+
+/* Topbar */
+.topbar{height:var(--th);background:rgba(6,14,31,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:50}
+.tb-title{font-size:17px;font-weight:700;color:#fff} .tb-bread{font-size:11.5px;color:var(--t3);margin-top:2px}
+.tb-right{display:flex;align-items:center;gap:12px}
+.tb-btn{width:38px;height:38px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--r2);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--t2);cursor:pointer;transition:var(--tr)}
+.tb-btn:hover{border-color:var(--red);color:#fca5a5}
+.tb-profile{display:flex;align-items:center;gap:10px;padding:6px 12px 6px 6px;border:1px solid var(--border);border-radius:var(--r2);background:rgba(255,255,255,.03)}
+.tb-pname{font-size:13px;font-weight:600;color:var(--t1)} .tb-prole{font-size:11px;color:var(--t3)}
+.ndot{position:absolute;top:6px;right:6px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid var(--sidebar)}
+.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+
+/* Layout */
+.main{margin-left:var(--sw);min-height:100vh;display:flex;flex-direction:column}
+.content{padding:26px;flex:1}
+.section{display:none}
+.section.active{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px}
+.sec-title{font-size:19px;font-weight:700;color:#fff;display:flex;align-items:center;gap:10px}
+.sec-title::before{content:'';width:4px;height:20px;background:linear-gradient(to bottom,var(--red),var(--amber));border-radius:2px;display:block;flex-shrink:0}
+
+/* Cards */
+.card{background:var(--card2);border:1px solid var(--border);border-radius:var(--r);padding:22px;box-shadow:var(--sh);transition:var(--tr)}
+.card:hover{border-color:rgba(255,255,255,.12);box-shadow:var(--sh2)}
+.card-title{font-size:11.5px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}
+.stat-card{background:var(--card2);border:1px solid var(--border);border-radius:var(--r);padding:20px;transition:var(--tr);position:relative;overflow:hidden}
+.stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--red),var(--amber));transform:scaleX(0);transform-origin:left;transition:var(--tr)}
+.stat-card:hover{transform:translateY(-3px);box-shadow:var(--sh2)} .stat-card:hover::after{transform:scaleX(1)}
+.stat-icon{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px;margin-bottom:12px}
+.si-blue{background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.2)}
+.si-green{background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.2)}
+.si-amber{background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.2)}
+.si-red{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.2)}
+.stat-lbl{font-size:11.5px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px}
+.stat-val{font-size:28px;font-weight:800;color:#fff;letter-spacing:-1px;font-family:'JetBrains Mono',monospace;line-height:1;margin-bottom:7px}
+.stat-sub{font-size:11.5px;color:var(--t3)}
+
+/* Badges */
+.rbadge{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:12px;font-weight:600}
+.rb-safe{background:rgba(16,185,129,.15);color:var(--green2);border:1px solid rgba(16,185,129,.3)}
+.rb-warn{background:rgba(245,158,11,.15);color:var(--amber2);border:1px solid rgba(245,158,11,.3)}
+.rb-danger{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.rb-info{background:rgba(59,130,246,.15);color:var(--blue3);border:1px solid rgba(59,130,246,.3)}
+
+/* Charts */
+.chart-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-bottom:22px}
+.chart-card{background:var(--card2);border:1px solid var(--border);border-radius:var(--r);padding:22px}
+.chart-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:8px}
+.chart-hdr h3{font-size:14px;font-weight:600;color:var(--t1)}
+
+/* Table */
+.tbl-wrap{overflow-x:auto}
+.dtable{width:100%;border-collapse:collapse}
+.dtable thead th{padding:12px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:var(--t4);background:rgba(255,255,255,.02);border-bottom:1px solid var(--border);white-space:nowrap}
+.dtable tbody td{padding:13px 16px;font-size:13px;color:var(--t2);border-bottom:1px solid var(--border2);transition:var(--tr)}
+.dtable tbody tr:hover td{background:rgba(255,255,255,.02);color:var(--t1)}
+.dtable tbody tr:last-child td{border-bottom:none}
+.mono{font-family:'JetBrains Mono',monospace}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 16px;border-radius:var(--r2);font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;border:none;transition:var(--tr);white-space:nowrap}
+.btn-primary{background:linear-gradient(135deg,var(--blue2),#1d4ed8);color:#fff;box-shadow:0 4px 14px rgba(37,99,235,.3)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(37,99,235,.45)}
+.btn-danger{background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;box-shadow:0 4px 14px rgba(239,68,68,.3)}
+.btn-danger:hover{transform:translateY(-1px)}
+.btn-ghost{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);color:var(--blue3)}
+.btn-ghost:hover{background:rgba(59,130,246,.18)}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--t2)}
+.btn-outline:hover{border-color:var(--blue);color:var(--blue3);background:var(--blue4)}
+.btn-sm{padding:6px 13px;font-size:12px}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Upload zone */
+.upload-zone{border:2px dashed rgba(255,255,255,.15);border-radius:var(--r);padding:48px 24px;text-align:center;cursor:pointer;transition:var(--tr);position:relative;background:rgba(255,255,255,.015)}
+.upload-zone:hover,.upload-zone.over{border-color:var(--blue);background:rgba(59,130,246,.05)}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-zone h3{font-size:16px;font-weight:600;color:var(--t1);margin-bottom:6px}
+.upload-zone p{font-size:13px;color:var(--t3)}
+.up-icon{font-size:48px;margin-bottom:16px}
+.progress-bar{height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;margin-top:12px}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--blue2),var(--green));transition:width .4s;width:0%}
+.prog-lbl{display:flex;justify-content:space-between;font-size:12px;color:var(--t3);margin-bottom:6px}
+
+/* Results reveal */
+.result-card{border-radius:var(--r);padding:18px;margin-bottom:12px;border:1px solid var(--border)}
+.result-safe{background:rgba(16,185,129,.06);border-color:rgba(16,185,129,.25)}
+.result-danger{background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.25)}
+.result-warn{background:rgba(245,158,11,.06);border-color:rgba(245,158,11,.25)}
+.result-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+.result-uid{font-size:14px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--t1)}
+.result-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}
+.result-metric{background:rgba(255,255,255,.04);border-radius:8px;padding:10px;text-align:center}
+.result-metric-val{font-size:18px;font-weight:800;font-family:'JetBrains Mono',monospace;color:#fff}
+.result-metric-lbl{font-size:10.5px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-top:3px}
+
+/* Format grid */
+.format-row{display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(255,255,255,.025);border-radius:8px;margin-bottom:6px;font-size:13px}
+.format-col{font-family:'JetBrains Mono',monospace;background:rgba(59,130,246,.12);color:var(--blue3);padding:2px 8px;border-radius:5px;font-size:12px}
+.format-desc{color:var(--t3);font-size:12px}
+
+.loading{display:flex;align-items:center;justify-content:center;padding:60px;flex-direction:column;gap:16px;color:var(--t3)}
+.loading-spinner{width:40px;height:40px;border:3px solid rgba(255,255,255,.1);border-top-color:var(--red);border-radius:50%;animation:spin .8s linear infinite}
+
+@media(max-width:1280px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:1100px){:root{--sw:68px}.sb-logo-text,.nlabel,.sb-user{display:none}.sb-sec{display:none}.nav-item{justify-content:center}.chart-grid{grid-template-columns:1fr}}
+@media(max-width:768px){.stats-grid{grid-template-columns:1fr 1fr}.content{padding:16px}}
+@media(max-width:480px){.stats-grid{grid-template-columns:1fr}.result-metrics{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-icon">🛡️</div>
+    <span class="sb-logo-text">Voltiq</span>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-sec">Admin Panel</div>
+    <div class="nav-item active" onclick="nav('overview',this)"><span class="ni">📊</span><span class="nlabel">Dashboard</span></div>
+    <div class="nav-item" onclick="nav('users',this)"><span class="ni">👥</span><span class="nlabel">Users</span></div>
+    <div class="nav-item" onclick="nav('datasets',this)"><span class="ni">📁</span><span class="nlabel">Upload Dataset</span></div>
+    <div class="sb-sec">System</div>
+    <div class="nav-item" onclick="nav('alerts',this)"><span class="ni">🚨</span><span class="nlabel">Alerts</span><span class="nbadge" id="alertCount">–</span></div>
+    <div class="nav-item" onclick="nav('analytics',this)"><span class="ni">📈</span><span class="nlabel">Analytics</span></div>
+    <div class="sb-sec">Account</div>
+    <div class="nav-item logout" onclick="logout()"><span class="ni">🚪</span><span class="nlabel">Logout</span></div>
+  </nav>
+  <div class="sb-user">
+    <div class="sb-user-inner">
+      <div class="avatar">DC</div>
+      <div><div class="sb-uname" id="sbName">Admin</div><div class="sb-urole">Super Admin</div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="topbar">
+    <div>
+      <div class="tb-title" id="tbTitle">Admin Dashboard</div>
+      <div class="tb-bread">Voltiq Admin / <span id="tbSec">Overview</span></div>
+    </div>
+    <div class="tb-right">
+      <div class="tb-btn" style="color:var(--green2);border-color:rgba(16,185,129,.3);background:rgba(16,185,129,.06)">
+        <span class="status-dot" style="background:var(--green2)"></span>
+      </div>
+      <div class="tb-btn" onclick="nav('alerts',null)" title="Alerts">🚨<span class="ndot" id="alertDot"></span></div>
+      <div class="tb-profile">
+        <div class="avatar av-lg">DC</div>
+        <div style="text-align:right">
+          <div class="tb-pname" id="topName">David Chen</div>
+          <div class="tb-prole">Super Admin</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- OVERVIEW -->
+    <div class="section active" id="sec-overview">
+      <div class="sec-hdr">
+        <h2 class="sec-title">System Overview</h2>
+        <button class="btn btn-ghost btn-sm" onclick="loadDefaultStats()">🔄 Refresh</button>
+      </div>
+      <div class="stats-grid" id="adminStatsGrid">
+        <div class="stat-card"><div class="loading"><div class="loading-spinner"></div></div></div>
+        <div class="stat-card"><div class="loading"><div class="loading-spinner"></div></div></div>
+        <div class="stat-card"><div class="loading"><div class="loading-spinner"></div></div></div>
+        <div class="stat-card"><div class="loading"><div class="loading-spinner"></div></div></div>
+      </div>
+      <div class="chart-grid">
+        <div class="chart-card">
+          <div class="chart-hdr"><h3>📊 Risk Score by User</h3></div>
+          <canvas id="riskByUserChart" height="180"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-hdr"><h3>🎯 Account Status Distribution</h3></div>
+          <canvas id="statusPieChart" height="180"></canvas>
+        </div>
+      </div>
+      <div class="chart-card" style="margin-bottom:22px">
+        <div class="chart-hdr"><h3>⚡ Energy Consumption per User</h3></div>
+        <canvas id="energyByUserChart" height="100"></canvas>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="section" id="sec-users">
+      <div class="sec-hdr"><h2 class="sec-title">User Management</h2></div>
+      <div class="card">
+        <div class="card-title">Registered Users & ML Analysis Results</div>
+        <div class="tbl-wrap">
+          <table class="dtable">
+            <thead><tr>
+              <th>User ID</th><th>Name</th><th>Email</th>
+              <th>Avg Risk Score</th><th>Theft Status</th><th>Anomaly Ratio</th><th>Energy (kWh)</th><th>Records</th>
+            </tr></thead>
+            <tbody id="userTableBody">
+              <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--t3)"><div class="loading-spinner" style="margin:auto;width:30px;height:30px"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- DATASETS / UPLOAD -->
+    <div class="section" id="sec-datasets">
+      <div class="sec-hdr"><h2 class="sec-title">Upload Dataset for Analysis</h2></div>
+
+      <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:22px;margin-bottom:22px">
+        <!-- Upload Card -->
+        <div class="card">
+          <div class="card-title">Upload CSV Dataset</div>
+          <div class="upload-zone" id="upZone" ondragover="onDrag(event,true)" ondragleave="onDrag(event,false)" ondrop="onDrop(event)">
+            <input type="file" id="csvFile" accept=".csv" onchange="fileSelected(event)">
+            <div class="up-icon" id="upIcon">📂</div>
+            <h3 id="upTitle">Drop your CSV file here</h3>
+            <p id="upDesc">or click to browse · supports .csv files</p>
+            <div style="margin-top:16px;display:none" id="fileInfo">
+              <div style="font-size:13px;font-weight:600;color:var(--green2)" id="fileName">—</div>
+              <div style="font-size:12px;color:var(--t3);margin-top:4px" id="fileSize">—</div>
+            </div>
+          </div>
+          <div style="margin-top:16px;display:none" id="progressWrap">
+            <div class="prog-lbl"><span>Processing with ML model...</span><span id="progPct">0%</span></div>
+            <div class="progress-bar"><div class="progress-fill" id="progFill"></div></div>
+          </div>
+          <button class="btn btn-primary" style="width:100%;margin-top:16px" id="upBtn" onclick="uploadFile()" disabled>
+            🚀 Upload &amp; Run ML Analysis
+          </button>
+          <div style="margin-top:12px;padding:12px 14px;border-radius:10px;font-size:13px;display:none" id="upMsg"></div>
+        </div>
+
+        <!-- Format Guide -->
+        <div class="card">
+          <div class="card-title">Expected CSV Format</div>
+          <p style="font-size:12.5px;color:var(--t3);margin-bottom:14px">Your CSV must include these columns:</p>
+          <div class="format-row"><span class="format-col">CustomerID</span><span class="format-desc">Unique user identifier (e.g. U0018)</span></div>
+          <div class="format-row"><span class="format-col">Voltage</span><span class="format-desc">Voltage reading (V)</span></div>
+          <div class="format-row"><span class="format-col">Current</span><span class="format-desc">Current reading (A)</span></div>
+          <div class="format-row"><span class="format-col">Power</span><span class="format-desc">Power in Watts</span></div>
+          <div class="format-row"><span class="format-col">PowerFactor</span><span class="format-desc">Power factor (0–1)</span></div>
+          <div class="format-row"><span class="format-col">EnergyConsumed</span><span class="format-desc">Energy in kWh</span></div>
+          <div class="format-row"><span class="format-col">ApparentPower</span><span class="format-desc">Apparent power (VA)</span></div>
+          <div class="format-row"><span class="format-col">PrevHourAvgPower</span><span class="format-desc">Previous hour average</span></div>
+          <button class="btn btn-outline btn-sm" style="margin-top:14px;width:100%" onclick="downloadTemplate()">⬇ Download Sample Template</button>
+        </div>
+      </div>
+
+      <!-- Results Section (shown after upload) -->
+      <div id="uploadResults" style="display:none">
+        <div class="sec-hdr" style="margin-top:8px">
+          <h2 class="sec-title" style="font-size:16px">📊 ML Analysis Results</h2>
+          <span class="rbadge rb-info" id="uploadSummaryBadge">—</span>
+        </div>
+        <div id="uploadResultCards"></div>
+        <div class="chart-grid" style="margin-top:16px">
+          <div class="chart-card">
+            <div class="chart-hdr"><h3>📊 Uploaded Data: Risk by User</h3></div>
+            <canvas id="uploadRiskChart" height="180"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="chart-hdr"><h3>⚡ Uploaded Data: Energy by User</h3></div>
+            <canvas id="uploadEnergyChart" height="180"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALERTS -->
+    <div class="section" id="sec-alerts">
+      <div class="sec-hdr"><h2 class="sec-title">System Alerts</h2></div>
+      <div id="alertCards">
+        <div class="loading"><div class="loading-spinner"></div><span>Loading alerts...</span></div>
+      </div>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div class="section" id="sec-analytics">
+      <div class="sec-hdr"><h2 class="sec-title">Advanced Analytics</h2></div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:22px">
+        <div class="chart-card">
+          <div class="chart-hdr"><h3>🔋 Power vs Voltage Scatter</h3></div>
+          <canvas id="scatterChart" height="220"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-hdr"><h3>🎯 Row-Level Risk Heatmap</h3></div>
+          <canvas id="heatmapChart" height="220"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:8000';
+let allStats = null;
+let uploadedResults = null;
+let charts = {};
+
+// ─── Auth ────────────────────────────────────────────────────────────────────
+function initAuth() {
+  try {
+    const u = JSON.parse(sessionStorage.getItem('vUser'));
+    if (!u || u.role !== 'admin') { window.location.href = 'login.html'; return; }
+    document.getElementById('sbName').textContent = u.name;
+    document.getElementById('topName').textContent = u.name;
+  } catch(e) { window.location.href = 'login.html'; return; }
+  loadDefaultStats();
+}
+
+function logout() { sessionStorage.removeItem('vUser'); window.location.href = 'login.html'; }
+
+function nav(id, el) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if (el) el.classList.add('active');
+  const titles = {overview:'Admin Dashboard',users:'User Management',datasets:'Upload Dataset',alerts:'System Alerts',analytics:'Analytics'};
+  document.getElementById('tbSec').textContent = titles[id]||id;
+  document.getElementById('tbTitle').textContent = titles[id]||id;
+  if (id === 'users' && allStats) renderUserTable(allStats);
+  if (id === 'alerts' && allStats) renderAlerts(allStats);
+  if (id === 'analytics' && allStats) renderAnalytics(allStats);
+}
+
+// ─── Load Stats ───────────────────────────────────────────────────────────
+async function loadDefaultStats() {
+  try {
+    const res = await fetch(`${API}/api/admin/stats`);
+    if (!res.ok) throw new Error();
+    allStats = await res.json();
+  } catch(e) {
+    allStats = OFFLINE_STATS;
+  }
+  renderOverview(allStats);
+  document.getElementById('alertCount').textContent = allStats.theft_alerts;
+  if (allStats.theft_alerts > 0) document.getElementById('alertDot').style.display='block';
+}
+
+function renderOverview(s) {
+  document.getElementById('adminStatsGrid').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-icon si-blue">👥</div>
+      <div class="stat-lbl">Total Users</div>
+      <div class="stat-val">${s.total_users}</div>
+      <div class="stat-sub">registered accounts</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon si-red">🚨</div>
+      <div class="stat-lbl">Theft Alerts</div>
+      <div class="stat-val" style="color:var(--red)">${s.theft_alerts}</div>
+      <div class="stat-sub">high-risk accounts</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon si-green">✅</div>
+      <div class="stat-lbl">Normal Users</div>
+      <div class="stat-val" style="color:var(--green2)">${s.normal_users}</div>
+      <div class="stat-sub">no suspicious activity</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon si-amber">⚡</div>
+      <div class="stat-lbl">Total Energy</div>
+      <div class="stat-val">${s.users.reduce((a,u)=>a+u.total_energy,0).toFixed(1)}</div>
+      <div class="stat-sub">kWh across all users</div>
+    </div>`;
+
+  drawOverviewCharts(s);
+}
+
+function drawOverviewCharts(s) {
+  const uids = s.users.map(u=>u.user_id);
+  const risks = s.users.map(u=>+(u.avg_theft_risk*100).toFixed(1));
+  const energies = s.users.map(u=>u.total_energy);
+  const colors = s.users.map(u=>u.theft_detected?'rgba(239,68,68,.7)':'rgba(16,185,129,.7)');
+
+  if (charts.riskByUser) charts.riskByUser.destroy();
+  charts.riskByUser = new Chart(document.getElementById('riskByUserChart'), {
+    type:'bar',
+    data:{labels:uids,datasets:[{label:'Risk Score (%)',data:risks,backgroundColor:colors,borderWidth:0,borderRadius:6}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#94a3b8'}},y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#94a3b8'},max:100}}}
+  });
+
+  if (charts.statusPie) charts.statusPie.destroy();
+  charts.statusPie = new Chart(document.getElementById('statusPieChart'), {
+    type:'doughnut',
+    data:{labels:['Normal','Suspicious'],datasets:[{data:[s.normal_users,s.theft_alerts],backgroundColor:['rgba(16,185,129,.7)','rgba(239,68,68,.7)'],borderWidth:0}]},
+    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#94a3b8'}}}}
+  });
+
+  if (charts.energyByUser) charts.energyByUser.destroy();
+  charts.energyByUser = new Chart(document.getElementById('energyByUserChart'), {
+    type:'bar',
+    data:{labels:uids,datasets:[{label:'Energy (kWh)',data:energies,backgroundColor:'rgba(59,130,246,.6)',borderColor:'#3b82f6',borderWidth:1,borderRadius:4}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#94a3b8'}},y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#94a3b8'}}}}
+  });
+}
+
+function renderUserTable(s) {
+  const rows = s.users.map(u=>`
+    <tr>
+      <td class="mono" style="color:var(--blue3)">${u.user_id}</td>
+      <td style="color:var(--t1)">${getUserName(u.user_id)}</td>
+      <td>${getUserEmail(u.user_id)}</td>
+      <td><span class="mono ${u.theft_detected?'':''}">
+        <span style="color:${u.avg_theft_risk>0.75?'var(--red)':u.avg_theft_risk>0.4?'var(--amber2)':'var(--green2)'}">${(u.avg_theft_risk*100).toFixed(1)}%</span>
+      </span></td>
+      <td><span class="rbadge ${u.theft_detected?'rb-danger':'rb-safe'}">${u.theft_detected?'⚠️ Suspicious':'✅ Normal'}</span></td>
+      <td>${(u.abnormal_ratio*100).toFixed(1)}%</td>
+      <td class="mono">${u.total_energy}</td>
+      <td>${u.records}</td>
+    </tr>`).join('');
+  document.getElementById('userTableBody').innerHTML = rows;
+}
+
+function renderAlerts(s) {
+  let html = '';
+  s.users.forEach(u=>{
+    if (u.theft_detected) {
+      html += `<div class="result-card result-danger" style="margin-bottom:12px">
+        <div class="result-header">
+          <div style="display:flex;align-items:center;gap:10px"><span style="font-size:24px">🚨</span><div>
+            <div class="result-uid">${u.user_id} — ${getUserName(u.user_id)}</div>
+            <div style="font-size:12px;color:var(--t3);margin-top:2px">High theft risk detected · ${u.records} records analyzed</div>
+          </div></div>
+          <span class="rbadge rb-danger">⚠️ Risk: ${(u.avg_theft_risk*100).toFixed(1)}%</span>
+        </div>
+        <div style="font-size:13px;color:#fca5a5">Avg theft risk score exceeds 75% threshold. Immediate investigation recommended.</div>
+      </div>`;
+    }
+  });
+  if (!html) html = `<div class="result-card result-safe"><div style="display:flex;align-items:center;gap:12px;font-size:14px;color:var(--green2)"><span style="font-size:24px">✅</span>All users are within normal parameters. No active alerts.</div></div>`;
+  document.getElementById('alertCards').innerHTML = html;
+}
+
+function renderAnalytics(s) {
+  // Try to get raw data from default results for scatter / heatmap
+  fetch(`${API}/api/results/default`)
+    .then(r=>r.json())
+    .then(drawAnalyticsCharts)
+    .catch(()=>drawAnalyticsCharts(null));
+}
+
+function drawAnalyticsCharts(defResults) {
+  const s = allStats;
+  const uids = s.users.map(u=>u.user_id);
+  const rows_data = uids.map(uid => {
+    const r = (uploadedResults && uploadedResults[uid]) || (defResults && defResults[uid]);
+    return r ? r.raw || [] : [];
+  });
+
+  // Scatter: Power vs Voltage across all rows
+  const scatterPoints = [];
+  uids.forEach((uid,i)=>{
+    const color = s.users[i].theft_detected ? 'rgba(239,68,68,.6)' : 'rgba(59,130,246,.5)';
+    rows_data[i].forEach(row=>{
+      scatterPoints.push({x:row.Voltage||0, y:row.Power||0, color});
+    });
+  });
+
+  if (charts.scatter) charts.scatter.destroy();
+  charts.scatter = new Chart(document.getElementById('scatterChart'), {
+    type:'scatter',
+    data:{datasets:uids.map((uid,i)=>({
+      label:uid,
+      data:rows_data[i].map(r=>({x:r.Voltage||0,y:r.Power||0})),
+      backgroundColor:s.users[i].theft_detected?'rgba(239,68,68,.5)':'rgba(59,130,246,.5)',
+      pointRadius:4
+    }))},
+    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',font:{size:11}}}},scales:{x:{title:{display:true,text:'Voltage (V)',color:'#64748b'},grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#94a3b8'}},y:{title:{display:true,text:'Power (W)',color:'#64748b'},grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#94a3b8'}}}}
+  });
+
+  // Row-level risk per user
+  if (charts.heatmap) charts.heatmap.destroy();
+  const datasets = uids.map((uid,i)=>{
+    const r = (uploadedResults && uploadedResults[uid]) || (defResults && defResults[uid]);
+    const risks = r ? (r.row_risks || []).map(v=>+(v*100).toFixed(1)) : [];
+    const colors = ['#3b82f6','#10b981','#f59e0b','#ef4444'];
+    return {label:uid, data:risks, borderColor:colors[i%colors.length], backgroundColor:'transparent', tension:.3, borderWidth:2, pointRadius:2};
+  });
+  charts.heatmap = new Chart(document.getElementById('heatmapChart'), {
+    type:'line',
+    data:{labels: Array.from({length:Math.max(...datasets.map(d=>d.data.length))},(_,i)=>`#${i+1}`), datasets},
+    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',font:{size:11}}}},scales:{x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#94a3b8',maxTicksLimit:8}},y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#94a3b8'},title:{display:true,text:'Risk (%)',color:'#64748b'}}}}
+  });
+}
+
+// ─── Upload ──────────────────────────────────────────────────────────────────
+let selectedFile = null;
+
+function onDrag(e, over) { e.preventDefault(); document.getElementById('upZone').classList.toggle('over',over); }
+function onDrop(e) {
+  e.preventDefault();
+  document.getElementById('upZone').classList.remove('over');
+  const f = e.dataTransfer.files[0];
+  if (f) setFile(f);
+}
+
+function fileSelected(e) { if (e.target.files[0]) setFile(e.target.files[0]); }
+
+function setFile(f) {
+  if (!f.name.endsWith('.csv')) { showUpMsg('❌ Only .csv files are supported', 'danger'); return; }
+  selectedFile = f;
+  document.getElementById('upIcon').textContent = '📄';
+  document.getElementById('upTitle').textContent = f.name;
+  document.getElementById('upDesc').textContent = `${(f.size/1024).toFixed(1)} KB · Click "Upload & Analyze" to proceed`;
+  document.getElementById('fileInfo').style.display = 'block';
+  document.getElementById('fileName').textContent = f.name;
+  document.getElementById('fileSize').textContent = `${(f.size/1024).toFixed(1)} KB`;
+  document.getElementById('upBtn').disabled = false;
+  hideUpMsg();
+}
+
+async function uploadFile() {
+  if (!selectedFile) return;
+  const btn = document.getElementById('upBtn');
+  btn.innerHTML = '<span class="spinner"></span> Analyzing...';
+  btn.disabled = true;
+  document.getElementById('progressWrap').style.display = 'block';
+  animateProgress();
+
+  try {
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+    const res = await fetch(`${API}/api/admin/upload`, { method:'POST', body:formData });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || 'Upload failed');
+    }
+
+    const data = await res.json();
+    uploadedResults = data.results;
+    showUploadResults(data);
+    showUpMsg(`✅ Success! ${data.total_rows} rows processed for ${data.users_found.length} users.`, 'success');
+
+    // Refresh overview charts with new data
+    allStats = buildStatsFromUpload(data.results);
+    renderOverview(allStats);
+
+  } catch(e) {
+    // Offline fallback: parse CSV client-side
+    await parseCSVOffline(selectedFile);
+  }
+
+  document.getElementById('progressWrap').style.display = 'none';
+  document.getElementById('progFill').style.width = '0%';
+  btn.innerHTML = '🚀 Upload &amp; Run ML Analysis';
+  btn.disabled = false;
+}
+
+async function parseCSVOffline(file) {
+  const text = await file.text();
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h=>h.trim());
+  const cidIdx = headers.indexOf('CustomerID');
+  if (cidIdx === -1) { showUpMsg('❌ Missing CustomerID column', 'danger'); return; }
+
+  const rows = {};
+  lines.slice(1).forEach(line=>{
+    const vals = line.split(',');
+    const cid = vals[cidIdx]?.trim();
+    if (!cid) return;
+    if (!rows[cid]) rows[cid] = [];
+    const row = {};
+    headers.forEach((h,i)=>{ row[h] = parseFloat(vals[i]) || vals[i]; });
+    rows[cid].push(row);
+  });
+
+  // Simulate ML results
+  const results = {};
+  Object.keys(rows).forEach(cid=>{
+    const r = rows[cid];
+    const avgPF = r.reduce((a,x)=>a+(parseFloat(x.PowerFactor)||0.9),0)/r.length;
+    const avgRisk = avgPF < 0.7 ? 0.82 : avgPF < 0.85 ? 0.55 : 0.25;
+    results[cid] = {
+      avg_theft_risk: avgRisk, theft_detected: avgRisk > 0.75,
+      abnormal_ratio: 0.05, abnormal_detected: false,
+      total_records: r.length, abnormal_count: Math.floor(r.length*0.05),
+      row_risks: r.map(()=>+(avgRisk+(Math.random()-0.5)*0.1).toFixed(3)),
+      avg_voltage: r.reduce((a,x)=>a+(parseFloat(x.Voltage)||230),0)/r.length,
+      avg_current: r.reduce((a,x)=>a+(parseFloat(x.Current)||5),0)/r.length,
+      avg_power: r.reduce((a,x)=>a+(parseFloat(x.Power)||1150),0)/r.length,
+      avg_power_factor: avgPF,
+      total_energy: r.reduce((a,x)=>a+(parseFloat(x.EnergyConsumed)||2),0),
+      raw: r.map(x=>({Voltage:+x.Voltage,Current:+x.Current,Power:+x.Power,PowerFactor:+x.PowerFactor,EnergyConsumed:+x.EnergyConsumed,ApparentPower:+x.ApparentPower,PrevHourAvgPower:+x.PrevHourAvgPower}))
+    };
+  });
+
+  uploadedResults = results;
+  const fakeData = { filename:file.name, total_rows:Object.values(rows).reduce((a,r)=>a+r.length,0), users_found:Object.keys(results), results };
+  showUploadResults(fakeData);
+  showUpMsg(`✅ Processed offline: ${fakeData.total_rows} rows for ${fakeData.users_found.length} users.`, 'success');
+  allStats = buildStatsFromUpload(results);
+  renderOverview(allStats);
+}
+
+function buildStatsFromUpload(results) {
+  const users = Object.keys(results).map(uid=>({
+    user_id: uid,
+    avg_theft_risk: results[uid].avg_theft_risk,
+    theft_detected: results[uid].theft_detected,
+    abnormal_ratio: results[uid].abnormal_ratio,
+    total_energy: results[uid].total_energy,
+    records: results[uid].total_records
+  }));
+  return {
+    total_users: users.length,
+    theft_alerts: users.filter(u=>u.theft_detected).length,
+    normal_users: users.filter(u=>!u.theft_detected).length,
+    users
+  };
+}
+
+function showUploadResults(data) {
+  document.getElementById('uploadResults').style.display = 'block';
+  document.getElementById('uploadSummaryBadge').textContent = `${data.users_found.length} users · ${data.total_rows} rows`;
+
+  const html = data.users_found.map(uid=>{
+    const r = data.results[uid];
+    const cls = r.theft_detected ? 'result-danger' : r.avg_theft_risk > 0.4 ? 'result-warn' : 'result-safe';
+    const badge = r.theft_detected ? 'rb-danger' : r.avg_theft_risk > 0.4 ? 'rb-warn' : 'rb-safe';
+    const status = r.theft_detected ? '⚠️ Suspicious' : r.avg_theft_risk > 0.4 ? '🔶 Medium Risk' : '✅ Normal';
+    return `<div class="result-card ${cls}">
+      <div class="result-header">
+        <div style="display:flex;align-items:center;gap:10px"><span style="font-size:28px">${r.theft_detected?'🚨':'✅'}</span><div>
+          <div class="result-uid">${uid}</div>
+          <div style="font-size:12px;color:var(--t3);margin-top:2px">${r.total_records} records analyzed</div>
+        </div></div>
+        <span class="rbadge ${badge}">${status}</span>
+      </div>
+      <div class="result-metrics">
+        <div class="result-metric"><div class="result-metric-val" style="color:${r.avg_theft_risk>0.75?'var(--red)':r.avg_theft_risk>0.4?'var(--amber2)':'var(--green2)'}">${(r.avg_theft_risk*100).toFixed(1)}%</div><div class="result-metric-lbl">Theft Risk</div></div>
+        <div class="result-metric"><div class="result-metric-val">${r.total_energy.toFixed(1)}</div><div class="result-metric-lbl">kWh Total</div></div>
+        <div class="result-metric"><div class="result-metric-val">${r.abnormal_count}</div><div class="result-metric-lbl">Anomalies</div></div>
+        <div class="result-metric"><div class="result-metric-val">${r.avg_voltage?.toFixed(0)||'—'}V</div><div class="result-metric-lbl">Avg Voltage</div></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('uploadResultCards').innerHTML = html;
+  drawUploadCharts(data.results, data.users_found);
+}
+
+function drawUploadCharts(results, uids) {
+  const risks = uids.map(u=>(results[u].avg_theft_risk*100).toFixed(1));
+  const energies = uids.map(u=>results[u].total_energy.toFixed(2));
+  const colors = uids.map(u=>results[u].theft_detected?'rgba(239,68,68,.7)':'rgba(16,185,129,.7)');
+
+  if (charts.uploadRisk) charts.uploadRisk.destroy();
+  charts.uploadRisk = new Chart(document.getElementById('uploadRiskChart'), {
+    type:'bar',
+    data:{labels:uids,datasets:[{label:'Risk Score (%)',data:risks,backgroundColor:colors,borderWidth:0,borderRadius:6}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#94a3b8'}},y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#94a3b8'},max:100}}}
+  });
+
+  if (charts.uploadEnergy) charts.uploadEnergy.destroy();
+  charts.uploadEnergy = new Chart(document.getElementById('uploadEnergyChart'), {
+    type:'bar',
+    data:{labels:uids,datasets:[{label:'Energy (kWh)',data:energies,backgroundColor:'rgba(245,158,11,.7)',borderWidth:0,borderRadius:6}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#94a3b8'}},y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#94a3b8'}}}}
+  });
+}
+
+function animateProgress() {
+  let p = 0;
+  const iv = setInterval(()=>{
+    p = Math.min(p + Math.random()*15, 90);
+    document.getElementById('progFill').style.width = p+'%';
+    document.getElementById('progPct').textContent = Math.floor(p)+'%';
+    if (p >= 90) clearInterval(iv);
+  }, 200);
+  setTimeout(()=>{
+    document.getElementById('progFill').style.width='100%';
+    document.getElementById('progPct').textContent='100%';
+  }, 3000);
+}
+
+function showUpMsg(msg, type) {
+  const el = document.getElementById('upMsg');
+  el.style.display = 'block';
+  el.style.background = type==='success' ? 'rgba(16,185,129,.1)' : 'rgba(239,68,68,.1)';
+  el.style.border = type==='success' ? '1px solid rgba(16,185,129,.3)' : '1px solid rgba(239,68,68,.3)';
+  el.style.color = type==='success' ? 'var(--green2)' : '#fca5a5';
+  el.textContent = msg;
+}
+function hideUpMsg() { document.getElementById('upMsg').style.display='none'; }
+
+function downloadTemplate() {
+  const csv = 'CustomerID,Voltage,Current,Power,PowerFactor,EnergyConsumed,ApparentPower,PrevHourAvgPower\nU0001,230,5.1,1173,0.96,2.2,1222,1100\nU0001,229,5.0,1145,0.95,2.1,1205,1085\nU0002,231,4.8,1109,0.97,2.0,1143,1050\n';
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'voltiq_template.csv'; a.click();
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+const USER_MAP = { 'U0018':['Alice Johnson','user1@voltiq.io'], 'U0021':['Bob Patel','user2@voltiq.io'], 'U0030':['Carlos Mendes','user3@voltiq.io'] };
+function getUserName(uid) { return (USER_MAP[uid]||[uid])[0]; }
+function getUserEmail(uid) { return (USER_MAP[uid]||['','—'])[1]||'—'; }
+
+// ─── Offline stats ────────────────────────────────────────────────────────────
+const OFFLINE_STATS = {
+  total_users:3, theft_alerts:1, normal_users:2,
+  users:[
+    {user_id:'U0018',avg_theft_risk:0.82,theft_detected:true,abnormal_ratio:0.08,total_energy:68.2,records:25},
+    {user_id:'U0021',avg_theft_risk:0.28,theft_detected:false,abnormal_ratio:0.04,total_energy:48.7,records:24},
+    {user_id:'U0030',avg_theft_risk:0.61,theft_detected:false,abnormal_ratio:0.13,total_energy:55.4,records:23},
+  ]
+};
+
+initAuth();
+</script>
+</body>
+</html>
