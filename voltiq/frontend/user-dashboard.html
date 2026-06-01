@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voltiq — My Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060e1f;--sidebar:#08111f;--card2:rgba(13,26,46,.8);
+  --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.05);
+  --blue:#3b82f6;--blue2:#2563eb;--blue3:#60a5fa;--blue4:rgba(59,130,246,.1);
+  --green:#10b981;--green2:#34d399;--green3:rgba(16,185,129,.1);
+  --red:#ef4444;--red3:rgba(239,68,68,.1);--amber:#f59e0b;--amber2:#fbbf24;
+  --t1:#f1f5f9;--t2:#94a3b8;--t3:#64748b;--t4:#475569;
+  --sw:260px;--th:68px;--r:16px;--r2:10px;
+  --tr:all .22s cubic-bezier(.4,0,.2,1);--sh:0 4px 24px rgba(0,0,0,.4);--sh2:0 8px 40px rgba(0,0,0,.5);
+}
+html,body{height:100%}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font-family:'Inter',sans-serif;cursor:pointer;border:none;outline:none}
+input,select{font-family:'Inter',sans-serif;outline:none}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--sidebar)}::-webkit-scrollbar-thumb{background:#1e3a5f;border-radius:3px}
+
+.sidebar{position:fixed;top:0;left:0;width:var(--sw);height:100vh;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100}
+.sb-logo{display:flex;align-items:center;gap:11px;padding:22px 20px;border-bottom:1px solid var(--border)}
+.sb-logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--blue2),var(--green));border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sb-logo-text{font-size:20px;font-weight:800;letter-spacing:-.5px;background:linear-gradient(135deg,#fff,var(--blue3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sb-nav{flex:1;padding:14px 10px;overflow-y:auto}
+.sb-sec{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t4);padding:0 10px;margin:18px 0 6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r2);font-size:13.5px;font-weight:500;color:var(--t3);cursor:pointer;transition:var(--tr);margin-bottom:2px}
+.nav-item:hover{background:rgba(255,255,255,.05);color:var(--t1)}
+.nav-item.active{background:linear-gradient(135deg,rgba(37,99,235,.18),rgba(37,99,235,.08));color:var(--blue3);border:1px solid rgba(59,130,246,.2)}
+.nav-item .ni{font-size:17px;width:22px;text-align:center;flex-shrink:0}
+.nav-item .nlabel{flex:1}
+.nav-item.logout{color:var(--red)}
+.nav-item.logout:hover{background:rgba(239,68,68,.1)}
+.sb-user{padding:14px;border-top:1px solid var(--border)}
+.sb-user-inner{display:flex;align-items:center;gap:10px;padding:10px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:var(--r2)}
+.avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--blue2),var(--green));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.av-lg{width:42px;height:42px;font-size:15px}
+.sb-uname{font-size:13px;font-weight:600;color:var(--t1)}
+.sb-urole{font-size:11px;color:var(--t3)}
+
+.topbar{height:var(--th);background:rgba(6,14,31,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:50}
+.tb-title{font-size:17px;font-weight:700;color:#fff}
+.tb-bread{font-size:11.5px;color:var(--t3);margin-top:2px}
+.tb-right{display:flex;align-items:center;gap:12px}
+.tb-profile{display:flex;align-items:center;gap:10px;padding:6px 12px 6px 6px;border:1px solid var(--border);border-radius:var(--r2);background:rgba(255,255,255,.03)}
+.tb-pname{font-size:13px;font-weight:600;color:var(--t1)}
+.tb-prole{font-size:11px;color:var(--t3)}
+.uid-badge{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;background:rgba(59,130,246,.15);color:var(--blue3);padding:3px 10px;border-radius:20px;border:1px solid rgba(59,130,246,.25)}
+
+.main{margin-left:var(--sw);min-height:100vh;display:flex;flex-direction:column}
+.content{padding:26px;flex:1}
+.section{display:none}
+.section.active{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px}
+.sec-title{font-size:19px;font-weight:700;color:#fff;display:flex;align-items:center;gap:10px}
+.sec-title::before{content:'';width:4px;height:20px;background:linear-gradient(to bottom,var(--blue),var(--green));border-radius:2px;display:block;flex-shrink:0}
+
+.card{background:var(--card2);border:1px solid var(--border);border-radius:var(--r);padding:22px;box-shadow:var(--sh);transition:var(--tr)}
+.card:hover{border-color:rgba(255,255,255,.12);box-shadow:var(--sh2)}
+.card-title{font-size:11.5px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px}
+
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}
+.stat-card{background:var(--card2);border:1px solid var(--border);border-radius:var(--r);padding:20px;transition:var(--tr);position:relative;overflow:hidden}
+.stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue2),var(--green));transform:scaleX(0);transform-origin:left;transition:var(--tr)}
+.stat-card:hover{transform:translateY(-3px);box-shadow:var(--sh2)}
+.stat-card:hover::after{transform:scaleX(1)}
+.stat-icon{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px;margin-bottom:12px}
+.si-blue{background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.2)}
+.si-green{background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.2)}
+.si-amber{background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.2)}
+.si-red{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.2)}
+.stat-lbl{font-size:11.5px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px}
+.stat-val{font-size:28px;font-weight:800;color:#fff;letter-spacing:-1px;font-family:'JetBrains Mono',monospace;line-height:1;margin-bottom:7px}
+.stat-sub{font-size:11.5px;color:var(--t3)}
+
+.rbadge{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:12px;font-weight:600}
+.rb-safe{background:rgba(16,185,129,.15);color:var(--green2);border:1px solid rgba(16,185,129,.3)}
+.rb-warn{background:rgba(245,158,11,.15);color:var(--amber2);border:1px solid rgba(245,158,11,.3)}
+.rb-danger{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+
+.chart-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-bottom:22px}
+.chart-card{background:var(--card2);border:1px solid var(--border);border-radius:var(--r);padding:22px}
+.chart-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:8px}
+.chart-hdr h3{font-size:14px;font-weight:600;color:var(--t1)}
+
+.alert-banner{padding:16px 20px;border-radius:var(--r);margin-bottom:22px;display:flex;align-items:center;gap:14px;font-size:14px;font-weight:500;animation:pulse-border 2s infinite}
+.alert-safe{background:rgba(16,185,129,.08);border:1.5px solid rgba(16,185,129,.35);color:var(--green2)}
+.alert-danger{background:rgba(239,68,68,.08);border:1.5px solid rgba(239,68,68,.35);color:#fca5a5}
+@keyframes pulse-border{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.3)}50%{box-shadow:0 0 0 5px rgba(239,68,68,0)}}
+
+.loading{display:flex;align-items:center;justify-content:center;padding:60px;flex-direction:column;gap:16px;color:var(--t3)}
+.loading-spinner{width:40px;height:40px;border:3px solid rgba(255,255,255,.1);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.pbar-wrap{height:8px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden;margin-top:8px}
+.pbar-fill{height:100%;border-radius:4px;transition:width .6s ease}
+.pbar-blue{background:linear-gradient(90deg,var(--blue2),var(--blue3))}
+.pbar-red{background:linear-gradient(90deg,#dc2626,var(--red))}
+.pbar-green{background:linear-gradient(90deg,var(--green),var(--green2))}
+
+.risk-meter{position:relative;text-align:center;padding:20px 0}
+.risk-label{font-size:13px;color:var(--t3);margin-bottom:12px}
+.risk-value{font-size:42px;font-weight:800;font-family:'JetBrains Mono',monospace;margin-bottom:6px}
+.risk-sub{font-size:12px;color:var(--t3)}
+.value-good{color:var(--green2)}
+.value-warn{color:var(--amber2)}
+.value-danger{color:var(--red)}
+
+@media(max-width:1100px){:root{--sw:68px}.sb-logo-text,.nlabel,.sb-user{display:none}.sb-sec{display:none}.nav-item{justify-content:center}.chart-grid{grid-template-columns:1fr}}
+@media(max-width:768px){.stats-grid{grid-template-columns:1fr 1fr}.content{padding:16px}}
+@media(max-width:480px){.stats-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-icon">⚡</div>
+    <span class="sb-logo-text">Voltiq</span>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-sec">My Account</div>
+    <div class="nav-item active" onclick="nav('overview',this)"><span class="ni">📊</span><span class="nlabel">My Dashboard</span></div>
+    <div class="nav-item" onclick="nav('usage',this)"><span class="ni">⚡</span><span class="nlabel">Usage Charts</span></div>
+    <div class="nav-item" onclick="nav('alerts',this)"><span class="ni">🔔</span><span class="nlabel">My Alerts</span></div>
+    <div class="sb-sec">Account</div>
+    <div class="nav-item logout" onclick="logout()"><span class="ni">🚪</span><span class="nlabel">Logout</span></div>
+  </nav>
+  <div class="sb-user">
+    <div class="sb-user-inner">
+      <div class="avatar" id="sbAvatar">?</div>
+      <div><div class="sb-uname" id="sbName">Loading...</div><div class="sb-urole" id="sbUid">—</div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="topbar">
+    <div>
+      <div class="tb-title" id="tbTitle">My Dashboard</div>
+      <div class="tb-bread">Voltiq / <span id="tbSec">Overview</span></div>
+    </div>
+    <div class="tb-right">
+      <span class="uid-badge" id="topUid">—</span>
+      <div class="tb-profile">
+        <div class="avatar av-lg" id="topAvatar">?</div>
+        <div>
+          <div class="tb-pname" id="topName">—</div>
+          <div class="tb-prole">Energy Consumer</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- OVERVIEW SECTION -->
+    <div class="section active" id="sec-overview">
+      <div class="sec-hdr">
+        <h2 class="sec-title">My Energy Overview</h2>
+        <span class="rbadge" id="statusBadge">Loading...</span>
+      </div>
+
+      <!-- Alert Banner -->
+      <div class="alert-banner alert-safe" id="alertBanner">
+        <span style="font-size:20px">⏳</span>
+        <span id="alertText">Loading your data...</span>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card"><div class="loading"><div class="loading-spinner"></div></div></div>
+        <div class="stat-card"><div class="loading"><div class="loading-spinner"></div></div></div>
+        <div class="stat-card"><div class="loading"><div class="loading-spinner"></div></div></div>
+        <div class="stat-card"><div class="loading"><div class="loading-spinner"></div></div></div>
+      </div>
+
+      <!-- Charts -->
+      <div class="chart-grid">
+        <div class="chart-card">
+          <div class="chart-hdr"><h3>⚡ Power Consumption Over Time</h3></div>
+          <canvas id="powerChart" height="160"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-hdr"><h3>🎯 Risk Score Distribution</h3></div>
+          <canvas id="riskChart" height="160"></canvas>
+        </div>
+      </div>
+
+      <!-- Detail Cards -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="card">
+          <div class="card-title">Theft Risk Meter</div>
+          <div class="risk-meter">
+            <div class="risk-label">Average Theft Risk Score</div>
+            <div class="risk-value" id="riskVal">—</div>
+            <div id="riskPbar"><div class="pbar-wrap"><div class="pbar-fill pbar-blue" id="riskBar" style="width:0%"></div></div></div>
+            <div class="risk-sub" id="riskDesc" style="margin-top:10px">Analyzing...</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Power Quality Metrics</div>
+          <div style="display:flex;flex-direction:column;gap:14px;margin-top:8px">
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--t2);margin-bottom:4px">
+                <span>Avg Voltage</span><span id="mVoltage" style="font-family:'JetBrains Mono',monospace">—</span>
+              </div>
+              <div class="pbar-wrap"><div class="pbar-fill pbar-blue" id="mVoltageBar" style="width:0%"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--t2);margin-bottom:4px">
+                <span>Avg Current</span><span id="mCurrent" style="font-family:'JetBrains Mono',monospace">—</span>
+              </div>
+              <div class="pbar-wrap"><div class="pbar-fill pbar-green" id="mCurrentBar" style="width:0%"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--t2);margin-bottom:4px">
+                <span>Power Factor</span><span id="mPF" style="font-family:'JetBrains Mono',monospace">—</span>
+              </div>
+              <div class="pbar-wrap"><div class="pbar-fill pbar-green" id="mPFBar" style="width:0%"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--t2);margin-bottom:4px">
+                <span>Anomaly Ratio</span><span id="mAnomaly" style="font-family:'JetBrains Mono',monospace">—</span>
+              </div>
+              <div class="pbar-wrap"><div class="pbar-fill pbar-red" id="mAnomalyBar" style="width:0%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- USAGE SECTION -->
+    <div class="section" id="sec-usage">
+      <div class="sec-hdr"><h2 class="sec-title">Energy Usage Charts</h2></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px">
+        <div class="chart-card">
+          <div class="chart-hdr"><h3>🔋 Voltage Readings</h3></div>
+          <canvas id="voltageChart" height="180"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-hdr"><h3>⚡ Current Readings</h3></div>
+          <canvas id="currentChart" height="180"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-hdr"><h3>📈 Energy Consumed per Reading</h3></div>
+        <canvas id="energyChart" height="120"></canvas>
+      </div>
+    </div>
+
+    <!-- ALERTS SECTION -->
+    <div class="section" id="sec-alerts">
+      <div class="sec-hdr"><h2 class="sec-title">My Alerts & Notifications</h2></div>
+      <div id="alertsList" class="card">
+        <div class="loading"><div class="loading-spinner"></div><span>Loading alerts...</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:8000';
+let userData = null;
+let mlResult = null;
+let charts = {};
+
+// ─── Auth ──────────────────────────────────────────────────────────────────
+function initAuth() {
+  try {
+    userData = JSON.parse(sessionStorage.getItem('vUser'));
+    if (!userData || userData.role !== 'user') {
+      window.location.href = 'login.html'; return;
+    }
+  } catch(e) { window.location.href = 'login.html'; return; }
+
+  const initials = userData.name.split(' ').map(w=>w[0]).join('').toUpperCase();
+  document.getElementById('sbAvatar').textContent = initials;
+  document.getElementById('sbName').textContent = userData.name;
+  document.getElementById('sbUid').textContent = userData.user_id || '';
+  document.getElementById('topAvatar').textContent = initials;
+  document.getElementById('topName').textContent = userData.name;
+  document.getElementById('topUid').textContent = userData.user_id || '';
+  loadData();
+}
+
+function logout() { sessionStorage.removeItem('vUser'); window.location.href='login.html'; }
+
+function nav(id, el) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if (el) el.classList.add('active');
+  const titles = {overview:'My Dashboard', usage:'Usage Charts', alerts:'My Alerts'};
+  document.getElementById('tbSec').textContent = titles[id]||id;
+  document.getElementById('tbTitle').textContent = titles[id]||id;
+  if (id === 'usage' && mlResult) drawUsageCharts(mlResult);
+  if (id === 'alerts' && mlResult) renderAlerts(mlResult);
+}
+
+// ─── Data Loading ─────────────────────────────────────────────────────────
+async function loadData() {
+  const uid = userData.user_id;
+  if (!uid) return;
+  try {
+    const res = await fetch(`${API}/api/results/user/${uid}`);
+    if (!res.ok) throw new Error('API error');
+    mlResult = await res.json();
+  } catch(e) {
+    // Use bundled CSV data offline
+    mlResult = OFFLINE_DATA[uid] || null;
+  }
+  if (mlResult) renderDashboard(mlResult);
+}
+
+// ─── Render Dashboard ────────────────────────────────────────────────────
+function renderDashboard(r) {
+  // Alert banner
+  const banner = document.getElementById('alertBanner');
+  const alertText = document.getElementById('alertText');
+  if (r.theft_detected) {
+    banner.className='alert-banner alert-danger';
+    alertText.textContent='⚠️ ALERT: Abnormal usage patterns detected in your account. Our team has been notified.';
+    document.getElementById('statusBadge').className='rbadge rb-danger';
+    document.getElementById('statusBadge').textContent='⚠️ Suspicious Activity';
+  } else {
+    banner.className='alert-banner alert-safe';
+    alertText.textContent='✅ Your account is operating normally. No suspicious activity detected.';
+    document.getElementById('statusBadge').className='rbadge rb-safe';
+    document.getElementById('statusBadge').textContent='✅ Account Normal';
+  }
+
+  // Stats grid
+  const riskPct = (r.avg_theft_risk * 100).toFixed(1);
+  const riskClass = r.avg_theft_risk < 0.4 ? 'value-good' : r.avg_theft_risk < 0.75 ? 'value-warn' : 'value-danger';
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-icon si-blue">⚡</div>
+      <div class="stat-lbl">Total Energy</div>
+      <div class="stat-val">${r.total_energy}</div>
+      <div class="stat-sub">kWh consumed</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon si-${r.theft_detected?'red':'green'}">🎯</div>
+      <div class="stat-lbl">Risk Score</div>
+      <div class="stat-val ${riskClass}">${riskPct}%</div>
+      <div class="stat-sub">${r.theft_detected?'High risk':'Low risk'}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon si-amber">📋</div>
+      <div class="stat-lbl">Records</div>
+      <div class="stat-val">${r.total_records}</div>
+      <div class="stat-sub">data readings</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon si-${r.abnormal_detected?'red':'green'}">🔍</div>
+      <div class="stat-lbl">Anomalies</div>
+      <div class="stat-val">${r.abnormal_count}</div>
+      <div class="stat-sub">${(r.abnormal_ratio*100).toFixed(1)}% of readings</div>
+    </div>`;
+
+  // Risk meter
+  const rv = (r.avg_theft_risk * 100).toFixed(1) + '%';
+  document.getElementById('riskVal').textContent = rv;
+  document.getElementById('riskVal').className = 'risk-value ' + riskClass;
+  document.getElementById('riskBar').style.width = (r.avg_theft_risk*100)+'%';
+  document.getElementById('riskBar').className = 'pbar-fill ' + (r.avg_theft_risk < 0.4 ? 'pbar-green' : 'pbar-red');
+  document.getElementById('riskDesc').textContent = r.theft_detected ? '🚨 Theft detected — contact support' : '✅ Usage within normal parameters';
+
+  // Metrics
+  document.getElementById('mVoltage').textContent = r.avg_voltage + ' V';
+  document.getElementById('mVoltageBar').style.width = Math.min((r.avg_voltage/260)*100,100)+'%';
+  document.getElementById('mCurrent').textContent = r.avg_current + ' A';
+  document.getElementById('mCurrentBar').style.width = Math.min((r.avg_current/15)*100,100)+'%';
+  document.getElementById('mPF').textContent = r.avg_power_factor;
+  document.getElementById('mPFBar').style.width = (r.avg_power_factor*100)+'%';
+  document.getElementById('mAnomaly').textContent = (r.abnormal_ratio*100).toFixed(1)+'%';
+  document.getElementById('mAnomalyBar').style.width = Math.min(r.abnormal_ratio*100,100)+'%';
+
+  // Main charts
+  drawMainCharts(r);
+}
+
+function drawMainCharts(r) {
+  const raw = r.raw || [];
+  const labels = raw.map((_,i) => `#${i+1}`);
+  const powers = raw.map(d => d.Power || 0);
+  const risks  = r.row_risks || raw.map(() => r.avg_theft_risk);
+
+  if (charts.power) charts.power.destroy();
+  charts.power = new Chart(document.getElementById('powerChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label:'Power (W)', data: powers,
+        borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,.1)',
+        fill:true, tension:.3, borderWidth:2, pointRadius:2
+      }]
+    },
+    options: { responsive:true, plugins:{legend:{display:false}}, scales:{
+      x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#64748b',maxTicksLimit:10}},
+      y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#64748b'}}
+    }}
+  });
+
+  if (charts.risk) charts.risk.destroy();
+  const low = risks.filter(r=>r<0.4).length;
+  const med = risks.filter(r=>r>=0.4&&r<0.75).length;
+  const high = risks.filter(r=>r>=0.75).length;
+  charts.risk = new Chart(document.getElementById('riskChart'), {
+    type:'doughnut',
+    data:{
+      labels:['Low (<40%)','Medium (40-75%)','High (>75%)'],
+      datasets:[{data:[low,med,high],backgroundColor:['rgba(16,185,129,.7)','rgba(245,158,11,.7)','rgba(239,68,68,.7)'],borderWidth:0}]
+    },
+    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',font:{size:11}}}}}
+  });
+}
+
+function drawUsageCharts(r) {
+  const raw = r.raw || [];
+  const labels = raw.map((_,i) => `#${i+1}`);
+
+  if (charts.voltage) charts.voltage.destroy();
+  charts.voltage = new Chart(document.getElementById('voltageChart'), {
+    type:'line',
+    data:{labels, datasets:[{label:'Voltage (V)',data:raw.map(d=>d.Voltage||0),borderColor:'#60a5fa',backgroundColor:'rgba(96,165,250,.1)',fill:true,tension:.3,borderWidth:2,pointRadius:2}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#64748b',maxTicksLimit:8}},y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#64748b'}}}}
+  });
+
+  if (charts.current) charts.current.destroy();
+  charts.current = new Chart(document.getElementById('currentChart'), {
+    type:'bar',
+    data:{labels, datasets:[{label:'Current (A)',data:raw.map(d=>d.Current||0),backgroundColor:'rgba(16,185,129,.6)',borderColor:'#10b981',borderWidth:1}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#64748b',maxTicksLimit:8}},y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#64748b'}}}}
+  });
+
+  if (charts.energy) charts.energy.destroy();
+  charts.energy = new Chart(document.getElementById('energyChart'), {
+    type:'bar',
+    data:{labels, datasets:[{label:'Energy Consumed (kWh)',data:raw.map(d=>d.EnergyConsumed||0),backgroundColor:'rgba(245,158,11,.6)',borderColor:'#f59e0b',borderWidth:1}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#64748b',maxTicksLimit:10}},y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#64748b'}}}}
+  });
+}
+
+function renderAlerts(r) {
+  const alerts = [];
+  if (r.theft_detected) alerts.push({type:'danger',icon:'🚨',title:'Theft Risk Detected',msg:`Your average theft risk score is ${(r.avg_theft_risk*100).toFixed(1)}%, which exceeds the 75% threshold. Please contact support.`});
+  if (r.abnormal_detected) alerts.push({type:'warn',icon:'⚠️',title:'Abnormal Readings Detected',msg:`${r.abnormal_count} readings (${(r.abnormal_ratio*100).toFixed(1)}%) are flagged as anomalous.`});
+  if (!r.theft_detected && !r.abnormal_detected) alerts.push({type:'safe',icon:'✅',title:'Account Normal',msg:'No suspicious activity or anomalies detected in your account.'});
+  alerts.push({type:'info',icon:'📊',title:'Latest Analysis Complete',msg:`${r.total_records} readings processed. Total energy: ${r.total_energy} kWh.`});
+
+  const colors = {danger:'var(--red)',warn:'var(--amber2)',safe:'var(--green2)',info:'var(--blue3)'};
+  const bgs = {danger:'rgba(239,68,68,.08)',warn:'rgba(245,158,11,.08)',safe:'rgba(16,185,129,.08)',info:'rgba(59,130,246,.08)'};
+  document.getElementById('alertsList').innerHTML = alerts.map(a=>`
+    <div style="display:flex;gap:14px;padding:16px;background:${bgs[a.type]};border-radius:10px;border:1px solid ${colors[a.type]}30;margin-bottom:12px">
+      <span style="font-size:22px;flex-shrink:0">${a.icon}</span>
+      <div><div style="font-size:14px;font-weight:600;color:${colors[a.type]};margin-bottom:4px">${a.title}</div>
+      <div style="font-size:13px;color:var(--t2)">${a.msg}</div></div>
+    </div>`).join('');
+}
+
+// ─── Offline fallback data ────────────────────────────────────────────────
+const OFFLINE_DATA = {
+  'U0018': {avg_theft_risk:0.82,theft_detected:true,abnormal_ratio:0.08,abnormal_detected:false,total_records:25,abnormal_count:2,row_risks:[0.9,0.85,0.88,0.82,0.91,0.75,0.79,0.86,0.83,0.8,0.87,0.79,0.72,0.78,0.81,0.84,0.86,0.88,0.9,0.77,0.74,0.82,0.85,0.88,0.91],avg_voltage:232.1,avg_current:5.9,avg_power:1380,avg_power_factor:0.91,total_energy:68.2,raw:[{Voltage:230,Current:5.1,Power:1173,PowerFactor:0.96,EnergyConsumed:2.2,ApparentPower:1222,PrevHourAvgPower:1100},{Voltage:229,Current:5.0,Power:1145,PowerFactor:0.95,EnergyConsumed:2.1,ApparentPower:1205,PrevHourAvgPower:1085},{Voltage:240,Current:8.5,Power:2040,PowerFactor:0.6,EnergyConsumed:5.2,ApparentPower:3400,PrevHourAvgPower:1500}]},
+  'U0021': {avg_theft_risk:0.28,theft_detected:false,abnormal_ratio:0.04,abnormal_detected:false,total_records:24,abnormal_count:1,row_risks:[0.2,0.25,0.3,0.22,0.28,0.35,0.27,0.24,0.31,0.26,0.29,0.23],avg_voltage:231.5,avg_current:4.8,avg_power:1108,avg_power_factor:0.95,total_energy:48.7,raw:[{Voltage:230,Current:4.8,Power:1104,PowerFactor:0.95,EnergyConsumed:2.0,ApparentPower:1162,PrevHourAvgPower:1050},{Voltage:231,Current:4.9,Power:1132,PowerFactor:0.96,EnergyConsumed:2.1,ApparentPower:1179,PrevHourAvgPower:1060},{Voltage:232,Current:5.0,Power:1160,PowerFactor:0.97,EnergyConsumed:2.2,ApparentPower:1196,PrevHourAvgPower:1070}]},
+  'U0030': {avg_theft_risk:0.61,theft_detected:false,abnormal_ratio:0.13,abnormal_detected:false,total_records:23,abnormal_count:3,row_risks:[0.55,0.62,0.58,0.65,0.7,0.6,0.63,0.57,0.67,0.61,0.59,0.64],avg_voltage:233.0,avg_current:5.5,avg_power:1280,avg_power_factor:0.92,total_energy:55.4,raw:[{Voltage:232,Current:5.4,Power:1253,PowerFactor:0.93,EnergyConsumed:2.3,ApparentPower:1347,PrevHourAvgPower:1150},{Voltage:235,Current:5.8,Power:1363,PowerFactor:0.91,EnergyConsumed:2.7,ApparentPower:1498,PrevHourAvgPower:1220},{Voltage:238,Current:6.2,Power:1476,PowerFactor:0.88,EnergyConsumed:3.1,ApparentPower:1677,PrevHourAvgPower:1300}]},
+};
+
+initAuth();
+</script>
+</body>
+</html>

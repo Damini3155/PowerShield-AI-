@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voltiq — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060e1f;--card:#0d1a2e;--card2:#0a1525;
+  --border:rgba(255,255,255,0.09);--border2:rgba(255,255,255,0.05);
+  --blue:#3b82f6;--blue2:#2563eb;--blue3:#60a5fa;
+  --green:#10b981;--green2:#34d399;--red:#ef4444;--amber:#f59e0b;
+  --t1:#f1f5f9;--t2:#94a3b8;--t3:#64748b;--t4:#475569;
+  --r:14px;--r2:10px;--shadow:0 25px 60px rgba(0,0,0,0.6);
+  --tr:all 0.2s cubic-bezier(.4,0,.2,1);
+}
+html,body{height:100%}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;display:flex;align-items:center;justify-content:center;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* Background */
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden}
+.bg-orb{position:absolute;border-radius:50%;filter:blur(80px);animation:float 10s ease-in-out infinite}
+.bg-orb1{width:600px;height:600px;top:-200px;right:-100px;background:radial-gradient(circle,rgba(37,99,235,.18),transparent 70%);animation-delay:0s}
+.bg-orb2{width:500px;height:500px;bottom:-200px;left:-100px;background:radial-gradient(circle,rgba(16,185,129,.12),transparent 70%);animation-delay:-5s}
+.bg-grid{position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:48px 48px;z-index:0}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-20px) scale(1.05)}}
+
+/* Layout */
+.wrap{position:relative;z-index:1;width:100%;max-width:480px;padding:24px}
+.logo{text-align:center;margin-bottom:32px}
+.logo-row{display:inline-flex;align-items:center;gap:12px;margin-bottom:8px}
+.logo-icon{width:52px;height:52px;background:linear-gradient(135deg,var(--blue2),var(--green));border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 0 30px rgba(59,130,246,.4),0 8px 20px rgba(0,0,0,.3)}
+.logo-name{font-size:34px;font-weight:800;letter-spacing:-1px;background:linear-gradient(135deg,#fff,var(--blue3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo-sub{font-size:13px;color:var(--t3);font-weight:400;letter-spacing:.2px}
+
+/* Card */
+.card{background:linear-gradient(135deg,rgba(13,26,46,.95),rgba(10,21,37,.9));border:1px solid var(--border);border-radius:22px;padding:40px;backdrop-filter:blur(20px);box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.06);animation:slideUp .5s ease forwards}
+@keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.card h2{font-size:24px;font-weight:700;color:#fff;margin-bottom:6px}
+.card-sub{font-size:14px;color:var(--t3);margin-bottom:28px;line-height:1.5}
+
+/* Role tabs */
+.role-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:24px}
+.role-tab{padding:12px 16px;border-radius:10px;border:1.5px solid var(--border);background:rgba(255,255,255,.03);cursor:pointer;text-align:center;transition:var(--tr)}
+.role-tab:hover{border-color:rgba(255,255,255,.15);background:rgba(255,255,255,.05)}
+.role-tab.active{border-color:var(--blue);background:rgba(59,130,246,.1);box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+.role-tab-icon{font-size:22px;margin-bottom:4px}
+.role-tab-label{font-size:13px;font-weight:600;color:var(--t1)}
+.role-tab-desc{font-size:11px;color:var(--t3);margin-top:2px}
+
+/* Form */
+.fgroup{margin-bottom:18px}
+.fgroup label{display:block;font-size:12.5px;font-weight:600;color:var(--t2);margin-bottom:8px;letter-spacing:.3px;text-transform:uppercase}
+.finput{position:relative}
+.finput input{width:100%;padding:13px 16px 13px 44px;background:rgba(255,255,255,.04);border:1.5px solid var(--border);border-radius:var(--r2);font-size:14px;color:var(--t1);font-family:'Inter',sans-serif;transition:var(--tr);outline:none}
+.finput input:focus{border-color:var(--blue);background:rgba(59,130,246,.07);box-shadow:0 0 0 4px rgba(59,130,246,.12)}
+.finput input::placeholder{color:var(--t4)}
+.ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;transition:var(--tr);color:var(--t4)}
+.finput:focus-within .ico{color:var(--blue)}
+.eye-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--t4);cursor:pointer;font-size:16px;padding:4px;border-radius:6px;transition:var(--tr)}
+.eye-btn:hover{color:var(--blue)}
+
+/* Checkbox row */
+.cr{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.clabel{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--t2);cursor:pointer}
+.clabel input[type=checkbox]{width:16px;height:16px;accent-color:var(--blue);cursor:pointer}
+.flink{font-size:13px;color:var(--blue);transition:var(--tr);cursor:pointer}
+.flink:hover{color:var(--blue3)}
+
+/* Button */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border:none;border-radius:var(--r2);font-size:15px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:var(--tr)}
+.btn-primary{background:linear-gradient(135deg,var(--blue2),#1d4ed8);color:#fff;box-shadow:0 4px 20px rgba(37,99,235,.4)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(37,99,235,.55)}
+.btn-primary:active{transform:translateY(0)}
+.btn:disabled{opacity:.6;cursor:not-allowed;transform:none!important}
+.spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Messages */
+.msg{margin-top:14px;padding:12px 16px;border-radius:10px;font-size:13px;display:none;align-items:flex-start;gap:10px;line-height:1.5}
+.msg.show{display:flex}
+.msg-err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5}
+.msg-ok{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:var(--green2)}
+
+/* Demo box */
+.demo-box{margin-top:18px;padding:16px 18px;background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:14px;font-size:12px;color:var(--t3);line-height:2}
+.demo-box strong{color:var(--t2);display:block;margin-bottom:4px;font-size:12.5px}
+.demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.demo-user{padding:10px 12px;background:rgba(255,255,255,.025);border:1px solid var(--border2);border-radius:8px;cursor:pointer;transition:var(--tr)}
+.demo-user:hover{border-color:var(--blue);background:rgba(59,130,246,.08)}
+.demo-user-name{font-size:12px;font-weight:600;color:var(--t2);margin-bottom:2px}
+.demo-user-cred{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--t3)}
+code{background:rgba(59,130,246,.15);color:var(--blue3);padding:2px 8px;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:10.5px}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:#1e3a5f;border-radius:3px}
+</style>
+</head>
+<body>
+<div class="bg">
+  <div class="bg-orb bg-orb1"></div>
+  <div class="bg-orb bg-orb2"></div>
+</div>
+<div class="bg-grid"></div>
+
+<div class="wrap">
+  <div class="logo">
+    <div class="logo-row">
+      <div class="logo-icon">⚡</div>
+      <span class="logo-name">Voltiq</span>
+    </div>
+    <div class="logo-sub">AI-Powered Electricity Monitoring & Theft Detection</div>
+  </div>
+
+  <div class="card">
+    <h2>Welcome back 👋</h2>
+    <p class="card-sub">Select your role and sign in to your dashboard</p>
+
+    <!-- Role Selector Tabs -->
+    <div class="role-tabs">
+      <div class="role-tab active" id="tab-user" onclick="selectRole('user')">
+        <div class="role-tab-icon">👤</div>
+        <div class="role-tab-label">User</div>
+        <div class="role-tab-desc">View my usage &amp; status</div>
+      </div>
+      <div class="role-tab" id="tab-admin" onclick="selectRole('admin')">
+        <div class="role-tab-icon">🛡️</div>
+        <div class="role-tab-label">Administrator</div>
+        <div class="role-tab-desc">Manage all users &amp; data</div>
+      </div>
+    </div>
+
+    <form id="form" onsubmit="doLogin(event)">
+      <div class="fgroup">
+        <label>Email Address</label>
+        <div class="finput">
+          <input type="email" id="email" placeholder="you@voltiq.io" required autocomplete="email">
+          <span class="ico">📧</span>
+        </div>
+      </div>
+      <div class="fgroup">
+        <label>Password</label>
+        <div class="finput">
+          <input type="password" id="pwd" placeholder="Enter your password" required autocomplete="current-password">
+          <span class="ico">🔑</span>
+          <button type="button" class="eye-btn" id="eyeBtn" onclick="toggleEye()">👁️</button>
+        </div>
+      </div>
+      <div class="cr">
+        <label class="clabel"><input type="checkbox" id="rem"> Remember me</label>
+        <span class="flink">Forgot password?</span>
+      </div>
+      <button type="submit" class="btn btn-primary" id="loginBtn">
+        <span id="btnText">Sign In</span>
+        <span>→</span>
+      </button>
+    </form>
+
+    <div class="msg msg-err" id="errMsg">
+      <span>⚠️</span>
+      <span id="errTxt">Invalid credentials. Please try again.</span>
+    </div>
+    <div class="msg msg-ok" id="okMsg">
+      <span>✅</span>
+      <span>Login successful! Redirecting...</span>
+    </div>
+  </div>
+
+  <!-- Demo credentials -->
+  <div class="demo-box">
+    <strong>🔐 Demo Credentials — click to auto-fill</strong>
+    <div class="demo-grid">
+      <div class="demo-user" onclick="fillCreds('user1@voltiq.io','user123','user')">
+        <div class="demo-user-name">👤 Alice Johnson</div>
+        <div class="demo-user-cred">user1@voltiq.io · U0018</div>
+      </div>
+      <div class="demo-user" onclick="fillCreds('user2@voltiq.io','user123','user')">
+        <div class="demo-user-name">👤 Bob Patel</div>
+        <div class="demo-user-cred">user2@voltiq.io · U0021</div>
+      </div>
+      <div class="demo-user" onclick="fillCreds('user3@voltiq.io','user123','user')">
+        <div class="demo-user-name">👤 Carlos Mendes</div>
+        <div class="demo-user-cred">user3@voltiq.io · U0030</div>
+      </div>
+      <div class="demo-user" onclick="fillCreds('admin@voltiq.io','admin123','admin')">
+        <div class="demo-user-name">🛡️ David Chen</div>
+        <div class="demo-user-cred">admin@voltiq.io · Admin</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:8000';
+let selectedRole = 'user';
+
+function selectRole(r) {
+  selectedRole = r;
+  document.getElementById('tab-user').classList.toggle('active', r === 'user');
+  document.getElementById('tab-admin').classList.toggle('active', r === 'admin');
+}
+
+function fillCreds(email, pwd, role) {
+  document.getElementById('email').value = email;
+  document.getElementById('pwd').value = pwd;
+  selectRole(role);
+}
+
+function toggleEye() {
+  const i = document.getElementById('pwd'), b = document.getElementById('eyeBtn');
+  i.type = i.type === 'password' ? 'text' : 'password';
+  b.textContent = i.type === 'password' ? '👁️' : '🙈';
+}
+
+async function doLogin(e) {
+  e.preventDefault();
+  const btn = document.getElementById('loginBtn');
+  const errEl = document.getElementById('errMsg');
+  const okEl  = document.getElementById('okMsg');
+  errEl.classList.remove('show'); okEl.classList.remove('show');
+  const email = document.getElementById('email').value.trim();
+  const pwd   = document.getElementById('pwd').value;
+
+  btn.innerHTML = '<span class="spinner"></span><span>Signing in...</span>';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(`${API}/api/auth/login`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({email, password: pwd, role: selectedRole})
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      sessionStorage.setItem('vUser', JSON.stringify(data));
+      okEl.classList.add('show');
+      setTimeout(() => {
+        window.location.href = data.role === 'admin' ? 'admin-dashboard.html' : 'user-dashboard.html';
+      }, 700);
+    } else {
+      throw new Error('Invalid credentials');
+    }
+  } catch (err) {
+    // Fallback offline mode
+    const db = {
+      'user1@voltiq.io':{'password':'user123','role':'user','name':'Alice Johnson','user_id':'U0018'},
+      'user2@voltiq.io':{'password':'user123','role':'user','name':'Bob Patel','user_id':'U0021'},
+      'user3@voltiq.io':{'password':'user123','role':'user','name':'Carlos Mendes','user_id':'U0030'},
+      'admin@voltiq.io':{'password':'admin123','role':'admin','name':'David Chen','user_id':null},
+    };
+    const u = db[email];
+    if (u && u.password === pwd && u.role === selectedRole) {
+      sessionStorage.setItem('vUser', JSON.stringify({name:u.name,email,role:u.role,user_id:u.user_id}));
+      okEl.classList.add('show');
+      setTimeout(() => {
+        window.location.href = u.role === 'admin' ? 'admin-dashboard.html' : 'user-dashboard.html';
+      }, 700);
+    } else {
+      document.getElementById('errTxt').textContent = 'Invalid email or password for selected role.';
+      errEl.classList.add('show');
+      btn.innerHTML = '<span id="btnText">Sign In</span><span>→</span>';
+      btn.disabled = false;
+    }
+  }
+}
+
+// Auto-redirect if already logged in
+try {
+  const u = JSON.parse(sessionStorage.getItem('vUser'));
+  if (u) window.location.href = u.role === 'admin' ? 'admin-dashboard.html' : 'user-dashboard.html';
+} catch(e) {}
+</script>
+</body>
+</html>
